@@ -6,14 +6,16 @@ import * as url from "url";
 
 const server = http.createServer();
 const publicDir = p.resolve(__dirname, "public");
+let cacheAge = 3600 * 24 * 365;
+
 server.on("request", (request: IncomingMessage, response: ServerResponse) => {
   const { method, url: path, headers } = request;
   const pathname = url.parse(path as string).pathname || "/index.html";
 
-  if (method !=='GET'){
-    response.statusCode = 405
-    response.end()
-    return
+  if (method !== "GET") {
+    response.statusCode = 405;
+    response.end();
+    return;
   }
 
   let filename = pathname.substring(1);
@@ -36,6 +38,7 @@ server.on("request", (request: IncomingMessage, response: ServerResponse) => {
         response.end("服务器繁忙，请稍后再试");
       }
     } else {
+      response.setHeader("Cache-Control", `public, max-age=${cacheAge}`);
       response.end(data);
     }
   });
